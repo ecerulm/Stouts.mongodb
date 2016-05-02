@@ -10,10 +10,13 @@
   set_fact:
     mongodb_daemon_name: "{{mongodb_config['daemon']}}"
 
+- include: configure.yml
+  when: mongodb_install
+
 - include: install.deb.yml
   when: ansible_os_family == 'Debian' and mongodb_install
 
-- include: configure.yml
+- include: configure_post.yml
   when: mongodb_install
 
 - include: docker.yml

@@ -1,0 +1,14 @@
+---
+
+- name: Ensure mongodb is started
+  service: name={{ mongodb_daemon_name }} state=started enabled=yes
+  changed_when: False
+
+- name: Flush handlers to restart mongodb if necessary
+  meta: flush_handlers
+
+- name: Run mongoshell commands
+  command: mongo {{ item.key }} --eval "{{ item.value|join('\n') }}"
+  when: mongodb_initial_primary is defined
+  tags: shell
+  with_dict: "{{mongodb_shell}}"
