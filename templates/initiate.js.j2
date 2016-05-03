@@ -1,0 +1,22 @@
+cfg = {
+  "_id": "{{ mongodb_conf_replSet }}",
+  "members": [
+  {% for node in play_hosts %}
+    {
+      "_id": {{ hostvars[node].mongo_id }},
+      "host": "{{ hostvars[node].ansible_fqdn }}:27017",
+    }{% if not loop.last %},{% endif %}
+  {% endfor %}
+  ]
+}
+
+printjson(cfg)
+if (rs.status().code == 94) {
+result = rs.initiate(cfg)
+printjson(result)
+}
+if (rs.isMaster().ismaster) {
+result = rs.reconfig(cfg)
+printjson(result)
+}
+

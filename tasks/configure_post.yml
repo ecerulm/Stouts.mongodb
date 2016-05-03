@@ -7,8 +7,16 @@
 - name: Flush handlers to restart mongodb if necessary
   meta: flush_handlers
 
-- name: Run mongoshell commands
-  command: mongo {{ item.key }} --eval "{{ item.value|join('\n') }}"
-  when: mongodb_initial_primary is defined
+- name: Initial replica script
+  template: src=initiate.js.j2 dest=/tmp/initiate.js
   tags: shell
-  with_dict: "{{mongodb_shell}}"
+
+- name: Run initiate script
+  command: mongo {{ item }} /tmp/initiate.js
+  tags: shell
+  with_items: "{{mongodb_init_dbs}}"
+  register: initiate
+
+- debug: var=item.stdout_lines
+  with_items: "{{ initiate.results }}"
+  tags: shell
